@@ -1,52 +1,80 @@
-var chercheSurGoogleImageMock = function(mot) {
-    return ['url1', 'url2']
-}; 
-
-$.chercheSurGoogleImage  = chercheSurGoogleImageMock;
-
-
 QUnit.testDone = function() {
     $("#test").empty();
 } 
 
-var démarre = function() {
-    $("#test").devineLeGoogle();
+module("Fonction utiles");
+
+var demarre = function(solutions) {
+    var keywords = []
+    
+    for (var keyword in solutions) {
+        keywords.push(keyword)
+    }
+    
+    keywords = keywords.reverse()
+    
+    var fake_generator = {next: function() {
+            return keywords.pop()
+        }
+    };
+    
+    $("#test").devineLeGoogle(fake_generator);
+    
+    $.getJSON = function(url, callback) {
+        var mot = url.substr(url.lastIndexOf("&q=") + 3)
+        var urls = solutions[mot]
+        var results = []
+        for(var i in urls) {
+            results.push({"tbUrl":urls[i]})
+        }
+        callback({"responseData": {"results":results}})
+    }
+
+    
     $("#test input[type=button]").click();
+   
 }
 
-test("peut afficher le bouton play", function() {
-    $("#test").devineLeGoogle();
-    
-    ok($("#test input[type=button]").size() == 1, "il manque un bouton")
-});
-
-test("recherche sur Google Images lorsqu'on clique sur le bouton play", function() {
-    démarre();
-    
-    equals($("#test img:first").attr('src'), 'url1');
-    equals($("#test img:last").attr('src'), 'url2');
-});
-
-test("Peut afficher l'input", function() {
-    démarre();
-    
-    equals($("#test input[type=text]#saisie").size(), 1)
-});
-
-test("Cliquer dans l'input ne duplique pas les images", function() {
-    démarre();
-    
-    $("#test input[type=text]").click();
-    
-    equals($("#test img").size(), 2);
-});
-
-test("Valider une entrée fausse affiche ERREUR", function() {
-    démarre();
-    $("#test #saisie").val("ceci est faux");
-    var event = { keyCode : '13' };
-    
-    $("#test #saisie").trigger("keypress", event);
-    
+function assertErreur(){
     equals($("#test #message").html(), "ERREUR");
+    equals($("#test #message").size(), 1);
+}
+
+function essaieSaisie(valeur) {
+    $("#test #saisie").val(valeur);
+    $("#test #saisie").trigger("change", {});
+}
+
+
+
+
+
+
+module("generateur");
+
+test("Le generateur retourne un mot", function() {
+    var _random = Math.random;
+    Math.random = function() { return 0.5 }
+    var mots = ["bonjour", "maman", "avion", "voiture", "piscine"]
+
+    var generateur = new Generateur(mots)
+    
+    equals(generateur.next(), "avion");
+    equals(generateur.next(), "maman");
+    equals(generateur.next(), "voiture");
+    equals(generateur.next(), "bonjour");
+    equals(generateur.next(), "piscine");
+    ok(generateur.next() == null);
+    Math.random = _random;
 });
+
+
+
+// TODO
+// HighScores?
+// Gerer les plantages (frequents) de Google
+// lancer du marketing viral sur facebook
+// faire un retour d'xp a Agile Tour puis Agile XXXX
+// Sortir les elements d'affichage de la page dans une fonction dediee
+
+

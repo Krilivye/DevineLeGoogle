@@ -3,10 +3,13 @@
 		<meta charset="UTF-8" />
 		<title>Devine le google !</title>
 		<script type="text/javascript" src="lib/jquery/jquery-1.4.2.js"></script>
+        <script type="text/javascript" src="http://jquery.offput.ca/js/jquery.timers.js"></script>
 		<script type="text/javascript" src="devine-le-google.js"></script>
 		<script type="text/javascript">
 			$(function()  {
-			    $("body").devineLeGoogle()
+                var mots = ["bonjour", "toto", "voiture", "dur", "mickey", "alcool", "rachida", "mot"]
+                var generateur = new Generateur(mots)
+			    $("body").devineLeGoogle(generateur)
             })
 		</script>
 	</head>
